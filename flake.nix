@@ -258,20 +258,7 @@
       postPatch = ''
         substituteInPlace src/spcm_core/pyspcm.py \
           --replace 'spcmDll = cdll.LoadLibrary ("libspcm_linux.so")' \
-'spcmDll = None
-for _spcm_path in [
-    "/usr/lib/x86_64-linux-gnu/libspcm_linux.so",
-    "/usr/local/lib/libspcm_linux.so",
-    "/opt/spcm/drivers/linux/libspcm_linux.so",
-    "libspcm_linux.so",
-]:
-    try:
-        spcmDll = cdll.LoadLibrary(_spcm_path)
-        break
-    except OSError:
-        continue
-if spcmDll is None:
-    raise OSError("libspcm_linux.so not found in common paths")'
+                    'spcmDll = cdll.LoadLibrary ("/usr/lib/x86_64-linux-gnu/libspcm_linux.so")'
       '';
       # Skip tests as they require hardware
       doCheck = false;

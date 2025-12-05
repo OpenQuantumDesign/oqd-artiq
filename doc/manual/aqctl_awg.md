@@ -43,12 +43,8 @@ pkill -f aqctl_awg; aqctl_awg &
 
 The `spcm-core` Python package expects `libspcm_linux.so` from Spectrum Instrumentation to be installed on the system. The driver is **not** bundled with the Python package and must be installed separately.
 
-The library is searched in the following locations (in order):
-
-1. `/usr/lib/x86_64-linux-gnu/libspcm_linux.so`
-2. `/usr/local/lib/libspcm_linux.so`
-3. `/opt/spcm/drivers/linux/libspcm_linux.so`
-4. System library path (`LD_LIBRARY_PATH`)
+The library is searched in the following location:
+`/usr/lib/x86_64-linux-gnu/libspcm_linux.so`
 
 If the driver is not found, the controller will fail with:
 ```
@@ -57,8 +53,8 @@ OSError: libspcm_linux.so not found in common paths
 
 Download and install the SPCM driver from the Spectrum Instrumentation website, then either:
 
-- Copy `libspcm_linux.so` to one of the paths above, or
-- Set `LD_LIBRARY_PATH` to include the directory containing the library
+- Copy `libspcm_linux.so` to the above path
+- Update the library path in [`flake.nix`](../../flake.nix) (search for `spcm-core`).
 
 ## Create Service File
 
