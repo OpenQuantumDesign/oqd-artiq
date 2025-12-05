@@ -254,12 +254,6 @@
       pyproject = true;
       build-system = with pkgs.python3Packages; [setuptools versioneer];
       propagatedBuildInputs = with pkgs.python3Packages; [numpy];
-      # Patch to load driver from system path
-      postPatch = ''
-        substituteInPlace src/spcm_core/pyspcm.py \
-          --replace 'spcmDll = cdll.LoadLibrary ("libspcm_linux.so")' \
-                    'spcmDll = cdll.LoadLibrary ("/usr/lib/x86_64-linux-gnu/libspcm_linux.so")'
-      '';
       # Skip tests as they require hardware
       doCheck = false;
       # Skip runtime dependency check as it requires the Spectrum driver
