@@ -55,8 +55,6 @@ If the driver is not found, the controller will fail with:
 OSError: libspcm_linux.so not found in common paths
 ```
 
-### Resolution
-
 Download and install the SPCM driver from the Spectrum Instrumentation website, then either:
 
 - Copy `libspcm_linux.so` to one of the paths above, or
