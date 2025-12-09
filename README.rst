@@ -27,6 +27,17 @@ Additional Documentation
 
 - `AWG Controller (aqctl_awg) <doc/manual/aqctl_awg.md>`_ - Controller for Spectrum Instrumentation AWG devices
 
+The AWG driver is developed in the `oqd-spectrum-ndsp <https://github.com/OpenQuantumDesign/oqd-spectrum-ndsp>`_ repository and included as a git submodule.
+
+First time setup (after cloning)::
+
+    git submodule init
+    git submodule update
+
+To pull the latest changes and sync the files::
+
+    ./sync_ndsp.sh
+
 License
 =======
 
