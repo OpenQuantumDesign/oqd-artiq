@@ -1,2 +1,0 @@
-"""ARTIQ frontend tools."""
-
