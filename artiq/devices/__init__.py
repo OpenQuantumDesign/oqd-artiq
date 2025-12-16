@@ -1,2 +1,0 @@
-"""ARTIQ device support packages."""
-

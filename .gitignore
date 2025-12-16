@@ -1,37 +1,23 @@
+# Python
 __pycache__/
-*.o
-*.d
-*.a
+*.py[cod]
+*$py.class
 *.so
-*.bin
-*.elf
-*.fbi
-*.pcap
-*.prof
-.ipynb_checkpoints
-/doc/manual/_build
-/build
-/result
-/dist
-/*.egg-info
-/.coverage
-/artiq/test/lit/*/Output/
-/artiq/binaries
-/artiq/firmware/target/
-/misoc_*/
-/artiq_*/
+.Python
+*.egg-info/
+dist/
+build/
 
-/artiq/test/results
-/artiq/examples/*/results
-/artiq/examples/*/last_rid.pyon
-/artiq/examples/*/dataset_db.mdb
-/artiq/examples/*/dataset_db.mdb-lock
+# Nix
+result/
+result-*/
 
-# when testing ad-hoc experiments at the root:
-/repository/
-/results
-/last_rid.pyon
-/dataset_db.mdb
-/dataset_db.mdb-lock
-/device_db*.py
-/test*
+# MkDocs
+site/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

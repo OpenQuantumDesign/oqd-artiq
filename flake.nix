@@ -41,6 +41,31 @@
       url = "github:m-labs/pythonparser";
       flake = false;
     };
+
+    artiq-src = {
+      url = "github:m-labs/artiq";
+      flake = false;
+    };
+
+    oqd-compiler-infrastructure = {
+      url = "github:OpenQuantumDesign/oqd-compiler-infrastructure";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    oqd-core = {
+      url = "github:OpenQuantumDesign/oqd-core";
+      flake = false;
+    };
+
+    oqd-redpitaya-system = {
+      url = "github:OpenQuantumDesign/oqd-redpitaya-system";
+      flake = false;
+    };
+
+    oqd-spectrum-ndsp = {
+      url = "github:OpenQuantumDesign/oqd-spectrum-ndsp";
+      flake = false;
+    };
   };
 
   outputs = {
@@ -53,6 +78,11 @@
     artiq-comtools,
     src-migen,
     src-misoc,
+    artiq-src,
+    oqd-compiler-infrastructure,
+    oqd-core,
+    oqd-redpitaya-system,
+    oqd-spectrum-ndsp,
   }: let
     pkgs' = import nixpkgs { system = "x86_64-linux"; };
     rust-overlay-patched = pkgs'.applyPatches {
@@ -67,10 +97,10 @@
     pkgs-aarch64 = import nixpkgs {system = "aarch64-linux";};
 
     artiqVersionMajor = 9;
-    artiqVersionMinor = self.sourceInfo.revCount or 0;
-    artiqVersionId = self.sourceInfo.shortRev or "unknown";
+    artiqVersionMinor = artiq-src.sourceInfo.revCount or 0;
+    artiqVersionId = artiq-src.sourceInfo.shortRev or "unknown";
     artiqVersion = (builtins.toString artiqVersionMajor) + "." + (builtins.toString artiqVersionMinor) + "+" + artiqVersionId + ".beta";
-    artiqRev = self.sourceInfo.rev or "unknown";
+    artiqRev = artiq-src.sourceInfo.rev or "unknown";
 
     qtPaths = let
       inherit (pkgs.qt6) qtbase qtsvg;
@@ -145,7 +175,7 @@
 
     libartiq-support = pkgs.stdenv.mkDerivation {
       name = "libartiq-support";
-      src = self;
+      src = artiq-src;
       buildInputs = [rust];
       buildPhase = ''
         rustc $src/artiq/test/libartiq_support/lib.rs -Cpanic=unwind -g
@@ -164,7 +194,7 @@
     artiq = pkgs.python3Packages.buildPythonPackage rec {
       pname = "artiq";
       version = artiqVersion;
-      src = self;
+      src = artiq-src;
       pyproject = true;
       build-system = [pkgs.python3Packages.setuptools];
 
@@ -315,14 +345,14 @@
       runScript = "vivado";
     };
 
-    makeArtiqBoardPackage = {
+      makeArtiqBoardPackage = {
       target,
       variant,
       buildCommand ? "python -m artiq.gateware.targets.${target} ${variant}",
     }:
       naerskLib.buildPackage {
         name = "artiq-board-${target}-${variant}";
-        src = ./artiq/firmware;
+        src = "${artiq-src}/artiq/firmware";
         additionalCargoLock = "${rust}/lib/rustlib/src/rust/Cargo.lock";
         singleStep = true;
         nativeBuildInputs = [
@@ -416,7 +446,7 @@
       pkgs.runCommand "artiq-frontend-dev-wrappers" {}
       ''
         mkdir -p $out/bin
-        for program in ${self}/artiq/frontend/*.py; do
+        for program in ${artiq-src}/artiq/frontend/*.py; do
           if [ -x $program ]; then
             progname=`basename -s .py $program`
             outname=$out/bin/$progname
@@ -426,10 +456,34 @@
           fi
         done
       '';
+  in let
+    oqd-compiler-infrastructure = oqd-compiler-infrastructure.packages.x86_64-linux.default;
+    oqd-core = pkgs.python3Packages.buildPythonPackage {
+      pname = "oqd-core";
+      src = oqd-core;
+      pyproject = true;
+      build-system = [pkgs.python3Packages.setuptools];
+      propagatedBuildInputs = [
+        oqd-compiler-infrastructure
+      ];
+    };
+    oqd-redpitaya-system = pkgs.python3Packages.buildPythonPackage {
+      pname = "oqd-redpitaya-system";
+      src = oqd-redpitaya-system;
+      pyproject = true;
+      build-system = [pkgs.python3Packages.setuptools];
+    };
+    oqd-spectrum-ndsp = pkgs.python3Packages.buildPythonPackage {
+      pname = "oqd-spectrum-ndsp";
+      src = oqd-spectrum-ndsp;
+      pyproject = true;
+      build-system = [pkgs.python3Packages.setuptools];
+    };
   in rec {
     packages.x86_64-linux = {
       inherit pythonparser qasync artiq artiq-build spcm;
       inherit migen misoc asyncserial microscope vivadoEnv vivado;
+      inherit oqd-compiler-infrastructure oqd-core oqd-redpitaya-system oqd-spectrum-ndsp;
       openocd-bscanspi = openocd-bscanspi-f pkgs;
       artiq-board-kc705-nist_clock = makeArtiqBoardPackage {
         target = "kc705";
@@ -451,7 +505,7 @@
       artiq-manual-html = pkgs.stdenvNoCC.mkDerivation rec {
         name = "artiq-manual-html-${version}";
         version = artiqVersion;
-        src = self;
+        src = artiq-src;
         buildInputs = with pkgs.python3Packages;
           [
             sphinx
@@ -467,7 +521,7 @@
           ];
         buildPhase = ''
           export VERSIONEER_OVERRIDE=${artiqVersion}
-          export SOURCE_DATE_EPOCH=${builtins.toString self.sourceInfo.lastModified}
+          export SOURCE_DATE_EPOCH=${builtins.toString artiq-src.sourceInfo.lastModified}
           cd doc/manual
           make html
         '';
@@ -480,7 +534,7 @@
       artiq-manual-pdf = pkgs.stdenvNoCC.mkDerivation rec {
         name = "artiq-manual-pdf-${version}";
         version = artiqVersion;
-        src = self;
+        src = artiq-src;
         buildInputs = with pkgs.python3Packages;
           [
             sphinx
@@ -496,7 +550,7 @@
           ];
         buildPhase = ''
           export VERSIONEER_OVERRIDE=${artiq.version}
-          export SOURCE_DATE_EPOCH=${builtins.toString self.sourceInfo.lastModified}
+          export SOURCE_DATE_EPOCH=${builtins.toString artiq-src.sourceInfo.lastModified}
           cd doc/manual
           make latexpdf
         '';
@@ -511,7 +565,13 @@
 
     inherit qtPaths makeArtiqBoardPackage openocd-bscanspi-f;
 
-    packages.x86_64-linux.default = pkgs.python3.withPackages (_: [packages.x86_64-linux.artiq]);
+    packages.x86_64-linux.default = pkgs.python3.withPackages (_: [
+      packages.x86_64-linux.artiq
+      packages.x86_64-linux.oqd-compiler-infrastructure
+      packages.x86_64-linux.oqd-core
+      packages.x86_64-linux.oqd-redpitaya-system
+      packages.x86_64-linux.oqd-spectrum-ndsp
+    ]);
 
     formatter.x86_64-linux = pkgs.alejandra;
 
@@ -537,8 +597,18 @@
             python3Packages.sphinxcontrib-tikz
             python3Packages.sphinxcontrib-wavedrom
             python3Packages.sphinx-rtd-theme
+            python3Packages.mkdocs
+            python3Packages.mkdocs-material
+            python3Packages.mkdocstrings
+            python3Packages.mkdocstrings-python
 
-            (python3.withPackages (ps: [migen misoc microscope spcm ps.packaging ps.paramiko] ++ artiq.propagatedBuildInputs))
+            (python3.withPackages (ps: [
+              migen misoc microscope spcm ps.packaging ps.paramiko
+              packages.x86_64-linux.oqd-compiler-infrastructure
+              packages.x86_64-linux.oqd-core
+              packages.x86_64-linux.oqd-redpitaya-system
+              packages.x86_64-linux.oqd-spectrum-ndsp
+            ] ++ artiq.propagatedBuildInputs))
           ]
           ++ [
             rust
@@ -547,6 +617,12 @@
 
             # To manually run compiler tests:
             libartiq-support
+
+            # OQD packages - add them directly so their entry points/scripts are in PATH
+            packages.x86_64-linux.oqd-compiler-infrastructure
+            packages.x86_64-linux.oqd-core
+            packages.x86_64-linux.oqd-redpitaya-system
+            packages.x86_64-linux.oqd-spectrum-ndsp
 
             # use the vivado-env command to enter a FHS shell that lets you run the Vivado installer
             packages.x86_64-linux.vivadoEnv
@@ -557,13 +633,7 @@
           export LIBARTIQ_SUPPORT=`libartiq-support`
           export QT_PLUGIN_PATH=${qtPaths.QT_PLUGIN_PATH}
           export QML2_IMPORT_PATH=${qtPaths.QML2_IMPORT_PATH}
-          artiq_root=$(git rev-parse --show-toplevel 2>/dev/null)
-          if [[ -z "$artiq_root" ]] || ! artiq_run --version > /dev/null 2>&1; then
-            echo "WARNING: Local ARTIQ repository not found, could not be added to PYTHONPATH."
-            echo "This development shell must be run from within the ARTIQ repository."
-          else
-            export PYTHONPATH="$artiq_root:$PYTHONPATH"
-          fi
+          export PYTHONPATH="${artiq-src}:$PYTHONPATH"
         '';
       };
       # Lighter development shell optimized for building firmware and flashing boards.
