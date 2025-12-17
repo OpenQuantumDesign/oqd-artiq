@@ -21,3 +21,5 @@ site/
 *.swp
 *.swo
 *~
+
+*diff
