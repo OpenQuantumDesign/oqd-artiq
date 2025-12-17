@@ -49,7 +49,7 @@
 
     oqd-compiler-infrastructure = {
       url = "github:OpenQuantumDesign/oqd-compiler-infrastructure";
-      inputs.nixpkgs.follows = "nixpkgs";
+      flake = false;
     };
 
     oqd-core = {
@@ -57,15 +57,6 @@
       flake = false;
     };
 
-    oqd-redpitaya-system = {
-      url = "github:OpenQuantumDesign/oqd-redpitaya-system";
-      flake = false;
-    };
-
-    oqd-spectrum-ndsp = {
-      url = "github:OpenQuantumDesign/oqd-spectrum-ndsp";
-      flake = false;
-    };
   };
 
   outputs = {
@@ -81,8 +72,6 @@
     artiq-src,
     oqd-compiler-infrastructure,
     oqd-core,
-    oqd-redpitaya-system,
-    oqd-spectrum-ndsp,
   }: let
     pkgs' = import nixpkgs { system = "x86_64-linux"; };
     rust-overlay-patched = pkgs'.applyPatches {
@@ -457,33 +446,38 @@
         done
       '';
   in let
-    oqd-compiler-infrastructure = oqd-compiler-infrastructure.packages.x86_64-linux.default;
-    oqd-core = pkgs.python3Packages.buildPythonPackage {
+    # Build oqd-compiler-infrastructure from source to ensure Python version consistency
+    oqd-compiler-infrastructure-pkg = pkgs.python3Packages.buildPythonPackage {
+      pname = "oqd-compiler-infrastructure";
+      version = "0.1.0";
+      src = oqd-compiler-infrastructure;
+      pyproject = true;
+      build-system = [pkgs.python3Packages.setuptools];
+      propagatedBuildInputs = with pkgs.python3Packages; [
+        pydantic
+      ];
+      dontCheckRuntimeDeps = true;
+    };
+    oqd-core-pkg = pkgs.python3Packages.buildPythonPackage {
       pname = "oqd-core";
+      version = "0.1.0";
       src = oqd-core;
       pyproject = true;
       build-system = [pkgs.python3Packages.setuptools];
-      propagatedBuildInputs = [
-        oqd-compiler-infrastructure
+      propagatedBuildInputs = with pkgs.python3Packages; [
+        oqd-compiler-infrastructure-pkg
+        numpy
+        scipy
+        pydantic
       ];
-    };
-    oqd-redpitaya-system = pkgs.python3Packages.buildPythonPackage {
-      pname = "oqd-redpitaya-system";
-      src = oqd-redpitaya-system;
-      pyproject = true;
-      build-system = [pkgs.python3Packages.setuptools];
-    };
-    oqd-spectrum-ndsp = pkgs.python3Packages.buildPythonPackage {
-      pname = "oqd-spectrum-ndsp";
-      src = oqd-spectrum-ndsp;
-      pyproject = true;
-      build-system = [pkgs.python3Packages.setuptools];
+      dontCheckRuntimeDeps = true;
     };
   in rec {
     packages.x86_64-linux = {
       inherit pythonparser qasync artiq artiq-build spcm;
       inherit migen misoc asyncserial microscope vivadoEnv vivado;
-      inherit oqd-compiler-infrastructure oqd-core oqd-redpitaya-system oqd-spectrum-ndsp;
+      oqd-compiler-infrastructure = oqd-compiler-infrastructure-pkg;
+      oqd-core = oqd-core-pkg;
       openocd-bscanspi = openocd-bscanspi-f pkgs;
       artiq-board-kc705-nist_clock = makeArtiqBoardPackage {
         target = "kc705";
@@ -569,8 +563,6 @@
       packages.x86_64-linux.artiq
       packages.x86_64-linux.oqd-compiler-infrastructure
       packages.x86_64-linux.oqd-core
-      packages.x86_64-linux.oqd-redpitaya-system
-      packages.x86_64-linux.oqd-spectrum-ndsp
     ]);
 
     formatter.x86_64-linux = pkgs.alejandra;
@@ -606,8 +598,6 @@
               migen misoc microscope spcm ps.packaging ps.paramiko
               packages.x86_64-linux.oqd-compiler-infrastructure
               packages.x86_64-linux.oqd-core
-              packages.x86_64-linux.oqd-redpitaya-system
-              packages.x86_64-linux.oqd-spectrum-ndsp
             ] ++ artiq.propagatedBuildInputs))
           ]
           ++ [
@@ -621,8 +611,6 @@
             # OQD packages - add them directly so their entry points/scripts are in PATH
             packages.x86_64-linux.oqd-compiler-infrastructure
             packages.x86_64-linux.oqd-core
-            packages.x86_64-linux.oqd-redpitaya-system
-            packages.x86_64-linux.oqd-spectrum-ndsp
 
             # use the vivado-env command to enter a FHS shell that lets you run the Vivado installer
             packages.x86_64-linux.vivadoEnv

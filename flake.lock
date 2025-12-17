@@ -24,6 +24,22 @@
         "type": "github"
       }
     },
+    "artiq-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1765867627,
+        "narHash": "sha256-NYmBPGKFdu1D6CjQmOB3SS1xowJvVzs7xHAXeH4ccQU=",
+        "owner": "m-labs",
+        "repo": "artiq",
+        "rev": "3bda1201a54f9685af5893b0832f669e8eca3909",
+        "type": "github"
+      },
+      "original": {
+        "owner": "m-labs",
+        "repo": "artiq",
+        "type": "github"
+      }
+    },
     "fenix": {
       "inputs": {
         "nixpkgs": [
@@ -49,6 +65,24 @@
     "flake-utils": {
       "inputs": {
         "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "flake-utils_2": {
+      "inputs": {
+        "systems": "systems_2"
       },
       "locked": {
         "lastModified": 1731533236,
@@ -101,11 +135,65 @@
         "type": "github"
       }
     },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1765779637,
+        "narHash": "sha256-KJ2wa/BLSrTqDjbfyNx70ov/HdgNBCBBSQP3BIzKnv4=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "1306659b587dc277866c7b69eb97e5f07864d8c4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "oqd-compiler-infrastructure": {
+      "inputs": {
+        "flake-utils": "flake-utils_2",
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1765818500,
+        "narHash": "sha256-dM4ZP7NIn5PrMJItudw4bOreYxNSnEIJOt0BgXUc27g=",
+        "owner": "OpenQuantumDesign",
+        "repo": "oqd-compiler-infrastructure",
+        "rev": "fb36ba5339f9ca85cf6772cf566cbdef219cb149",
+        "type": "github"
+      },
+      "original": {
+        "owner": "OpenQuantumDesign",
+        "repo": "oqd-compiler-infrastructure",
+        "type": "github"
+      }
+    },
+    "oqd-core": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1757506859,
+        "narHash": "sha256-gpO9zIZj6slDs4n348a9ECOH/5KV6lTjlMp5FV4+bik=",
+        "owner": "OpenQuantumDesign",
+        "repo": "oqd-core",
+        "rev": "6fa6de20dd18c53c63a12d8ffcc5597eba0c0b83",
+        "type": "github"
+      },
+      "original": {
+        "owner": "OpenQuantumDesign",
+        "repo": "oqd-core",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "artiq-comtools": "artiq-comtools",
+        "artiq-src": "artiq-src",
         "naersk": "naersk",
         "nixpkgs": "nixpkgs",
+        "oqd-compiler-infrastructure": "oqd-compiler-infrastructure",
+        "oqd-core": "oqd-core",
         "rust-overlay": "rust-overlay",
         "sipyco": "sipyco",
         "src-migen": "src-migen",
@@ -222,6 +310,21 @@
       }
     },
     "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_2": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
